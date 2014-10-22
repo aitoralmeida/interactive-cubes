@@ -1,0 +1,9 @@
+<!doctype html>
+<title>Cube {{ cube_id }} battery level</title>
+    <h1>Battery level for cube {{ cube_id }}: 
+    {% if level %}
+      {{ level }}%
+    {% else %}
+      no info
+    {% endif %}
+    </h1>

@@ -14,7 +14,10 @@ CUBE IDS
 '''
 
 from flask import Flask
+from flask import render_template
+
 import serial
+
 import networkx as nx
 from networkx.readwrite import json_graph
 import json
@@ -143,9 +146,10 @@ def show_battery_level(cube_id):
     reply = get_battery_level(cube_id)
     if reply != ERROR:
         level = reply.split(SEP_CHAR)[1]
-        return level
     else:
-        return 'No such cube id'
+        level = None
+    
+    return render_template('battery.html', cube_id=cube_id, level=level)
 
 if __name__ == "__main__":
     app.debug = True
