@@ -5,10 +5,19 @@ Created on Wed Oct 22 11:31:35 2014
 @author: aitor
 """
 
+''' 
+CUBE IDS
+ - Violet: 1
+ - Yellow : 2
+ - Red: 4
+ - Orange: 6
+'''
+
 from flask import Flask
 import serial
-import time
 import networkx as nx
+from networkx.readwrite import json_graph
+import json
 
 app = Flask(__name__)
 
@@ -22,11 +31,10 @@ SEP_CHAR = ','
 SEP_CHAR2 = ';'
 SEP_CHAR3 = '-'
 SEP_CHAR4 = '.'
+ERROR = 'error'
 
-ser = serial.Serial(SERIAL_NUMBER)
 
-
-def read_eol():
+def read_eol(ser):
     command = ''
     while(True):
         c = ser.read()        
@@ -36,21 +44,47 @@ def read_eol():
             command += c
     return command
     
-def send_command(command):
-    ser.write(command + EOL_CHAR)
     
 def get_battery_level(cube_id):
+    ser = serial.Serial(SERIAL_NUMBER)
+    reply = ERROR
     command = '%s %s%s' % (CMD_GET_BATTERY, cube_id, EOL_CHAR)
     #Reply: BATTERY 6,84
     print ' - Sending:', command
-    reply = read_eol()    
+    try:        
+        ser.write(command)
+        reply = read_eol(ser) 
+        print 'reply:', reply
+        while not reply.startswith(RPL_BATTERY):
+            reply = read_eol(ser)
+            print 'reply:', reply
+    except TypeError as e:
+        print 'get_graph:', e
+        print ' - command:', command
+        reply = ERROR
+    finally:        
+        ser.close()
+        
     return reply
     
 def get_graph():
+    ser = serial.Serial(SERIAL_NUMBER)
     command = CMD_GET_GRAPH + EOL_CHAR
-    print ' - Sending:', command
-    ser.write(command + EOL_CHAR)
-    reply = read_eol()
+    reply = ERROR
+    try:        
+        print ' - Sending:', command
+        ser.write(command + EOL_CHAR)
+        reply = read_eol(ser)
+        print reply
+        while not reply.startswith(RPL_GRAPH):
+            reply = read_eol(ser)
+            print reply
+    except TypeError as e:
+        print 'get_graph:', e
+        print ' - command:', command
+        reply = ERROR
+    finally:        
+        ser.close()
     return reply
     
 def split_edges(seq):
@@ -84,7 +118,7 @@ def build_graph(graph_state):
     for f in faces:
         node = f.split(SEP_CHAR3)[0]
         face = f.split(SEP_CHAR3)[1]
-        G.add_node(node, face=face)
+        G.add_node(node, label='CUBE-%s' % (node), face=face)
         
     for edge in edges:
         a = edge[0]
@@ -95,14 +129,24 @@ def build_graph(graph_state):
 
 
 @app.route("/graph/")
-def hello():
-    command = get_graph()
-    print command
-    while not command.startswith(RPL_GRAPH):
-        command = read_eol()
-        
-    G = build_graph(command.split(' ')[1])
-    return str(G.edges())
+def show_graph():
+    reply = get_graph()
+    if reply != ERROR:
+        G = build_graph(reply.split(' ')[1])
+        data = json_graph.node_link_data(G)
+        return json.dumps(data)
+    else:
+        return 'No graph found'
+    
+@app.route("/battery_level/<int:cube_id>/")
+def show_battery_level(cube_id):
+    reply = get_battery_level(cube_id)
+    if reply != ERROR:
+        level = reply.split(SEP_CHAR)[1]
+        return level
+    else:
+        return 'No such cube id'
 
 if __name__ == "__main__":
+    app.debug = True
     app.run()
