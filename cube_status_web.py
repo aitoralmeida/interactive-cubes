@@ -137,9 +137,12 @@ def show_graph():
     if reply != ERROR:
         G = build_graph(reply.split(' ')[1])
         data = json_graph.node_link_data(G)
-        return json.dumps(data)
+        json_data = json.dumps(data)
     else:
-        return 'No graph found'
+        json_data = None 
+        
+    return render_template('graph.html', data = json_data)
+        
     
 @app.route("/battery_level/<int:cube_id>/")
 def show_battery_level(cube_id):
