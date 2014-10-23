@@ -13,8 +13,7 @@ CUBE IDS
  - Orange: 6
 '''
 
-from flask import Flask
-from flask import render_template
+from flask import Flask, render_template
 
 import serial
 
@@ -141,6 +140,8 @@ def show_graph():
     else:
         json_data = None 
         
+
+    #json_data = '{"directed": false, "graph": [], "nodes": [{"label": "CUBE-4", "id": "4", "face": "5"}, {"label": "CUBE-6", "id": "6", "face": "5"}], "links": [{"source": 0, "target": 1, "value" : 5}], "multigraph": false} '
     return render_template('graph.html', data = json_data)
         
     
