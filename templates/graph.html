@@ -1,29 +1,34 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-
-.node {
-  stroke: #fff;
-  stroke-width: 1.5px;
-}
-
-.link {
-  stroke: #999;
-  stroke-opacity: .6;
-}
-
-</style>
-<title>Cubes' configuration</title>
+<head>
+    <meta charset="utf-8">
+    <style>
+        .node {
+          stroke: #fff;
+          stroke-width: 1.5px;
+        }
+        
+        .link {
+          stroke: #999;
+          stroke-opacity: .6;
+        }
+    </style>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet"> 
+    
+    <title>Cubes' configuration</title>
+</head>
 
 <body>
 
 {% if data %}
-    <h1> Current Status </h1>  
-    <h2>Connections:</h2>
+    <div class="page-header">
+        <h4>Connections</h4>
+    </div>
     <div id="cube-graph"></div>
     <br>
 
-    <h2>Battery Levels:</h2> 
+    <div class="page-header">
+        <h4>Batery Levels</h4>
+    </div> 
     <ul>
     {% for node  in battery_levels%}
         <li> CUBE-{{ node }}: {{ battery_levels[node] }}% </li>
@@ -31,20 +36,30 @@
     </ul>
 
     <br>
-    <h4>Raw data:</h4> 
-    {{ data }}
+    <div class="panel panel-info">
+        <div class="panel-heading">
+          <h4 class="panel-title">Raw data</h4>
+        </div>
+        <div class="panel-body">
+          {{ data }}
+        </div>
+    </div>
+    
     
 {% else %}
   The cubes are not inter-connected.
 {% endif %}
 
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
 
 <script>
         var graph = {{ data|safe }};
 
-        var width = 600;
-        var height = 600;
+        var width = 400;
+        var height = 400;
 
         var color = d3.scale.category20();
 
