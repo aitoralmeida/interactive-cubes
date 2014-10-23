@@ -9,7 +9,9 @@ Created on Wed Oct 22 11:31:35 2014
 CUBE IDS
  - Violet: 1
  - Yellow : 2
+ - Blue: 3
  - Red: 4
+ - Green: 5
  - Orange: 6
 '''
 
