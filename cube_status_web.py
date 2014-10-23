@@ -135,16 +135,22 @@ def build_graph(graph_state):
 @app.route("/graph/")
 def show_graph():
     reply = get_graph()
+    battery_levels = {}
     if reply != ERROR:
         G = build_graph(reply.split(' ')[1])
         data = json_graph.node_link_data(G)
         json_data = json.dumps(data)
+        for node in G.nodes():
+            reply = get_battery_level(int(node))
+            level = reply.split(SEP_CHAR)[1]
+            battery_levels[node] = level            
     else:
         json_data = None 
+        battery_levels = None
         
 
     #json_data = '{"directed": false, "graph": [], "nodes": [{"label": "CUBE-4", "id": "4", "face": "5"}, {"label": "CUBE-6", "id": "6", "face": "5"}], "links": [{"source": 0, "target": 1, "value" : 5}], "multigraph": false} '
-    return render_template('graph.html', data = json_data)
+    return render_template('graph.html', data = json_data, battery_levels = battery_levels)
         
     
 @app.route("/battery_level/<int:cube_id>/")

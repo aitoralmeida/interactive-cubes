@@ -18,11 +18,22 @@
 <body>
 
 {% if data %}
-    <h1> Cube Graph </h1>  
+    <h1> Current Status </h1>  
+    <h2>Connections:</h2>
     <div id="cube-graph"></div>
+    <br>
+
+    <h2>Battery Levels:</h2> 
+    <ul>
+    {% for node  in battery_levels%}
+        <li> CUBE-{{ node }}: {{ battery_levels[node] }}% </li>
+    {% endfor %}
+    </ul>
+
     <br>
     <h4>Raw data:</h4> 
     {{ data }}
+    
 {% else %}
   The cubes are not inter-connected.
 {% endif %}
