@@ -135,22 +135,16 @@ def build_graph(graph_state):
 @app.route("/graph/")
 def show_graph():
     reply = get_graph()
-    battery_levels = {}
     if reply != ERROR:
         G = build_graph(reply.split(' ')[1])
         data = json_graph.node_link_data(G)
-        json_data = json.dumps(data)
-        for node in G.nodes():
-            reply = get_battery_level(int(node))
-            level = reply.split(SEP_CHAR)[1]
-            battery_levels[node] = level            
+        json_data = json.dumps(data)          
     else:
         json_data = None 
-        battery_levels = None
         
 
     #json_data = '{"directed": false, "graph": [], "nodes": [{"label": "CUBE-4", "id": "4", "face": "5"}, {"label": "CUBE-6", "id": "6", "face": "5"}], "links": [{"source": 0, "target": 1, "value" : 5}], "multigraph": false} '
-    return render_template('graph.html', data = json_data, battery_levels = battery_levels)
+    return render_template('graph.html', data = json_data)
         
     
 @app.route("/battery_level/<int:cube_id>/")
@@ -162,6 +156,23 @@ def show_battery_level(cube_id):
         level = None
     
     return render_template('battery.html', cube_id=cube_id, level=level)
+    
+@app.route("/battery_levels/")
+def show_battery_levels():
+    reply = get_graph()
+    battery_levels = {}
+    if reply != ERROR:
+        graph_state = reply.split(' ')[1]
+        faces = graph_state.split(SEP_CHAR)[0].split(SEP_CHAR2)
+        for f in faces:
+            node = f.split(SEP_CHAR3)[0]
+            reply = get_battery_level(int(node))
+            level = reply.split(SEP_CHAR)[1]
+            battery_levels[node] = level                            
+    else:
+        battery_levels = None
+        
+    return render_template('battery_levels.html', battery_levels = battery_levels)
 
 if __name__ == "__main__":
     app.debug = True
